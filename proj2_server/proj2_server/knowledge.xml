@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+初始化
+FD_ZERO( * set )－－初始化套接字队列－set
+插入
+FD_SET( s, *set )－－将套接字s插入到队列set中
+删除
+FD_CLR( s, *set )－－从队列set中删除套接字s
+查找
+FD_ISSET(s, *set )－－查找s是否在队列set中

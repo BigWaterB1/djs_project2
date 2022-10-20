@@ -130,6 +130,9 @@
   <ItemGroup>
     <ClCompile Include="proj2_server.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="knowledge.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
