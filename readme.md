@@ -29,9 +29,9 @@ keyboard：连接，循环（获取键入信息，发送，“exit”退出）
 
 套接字连接规则
 
-client：s套接字监听keyboard连接，sock套接字连接server.
+client：s轮询套接字监听keyboard连接，sock套接字连接server.
 
-server：socket_list.Keyboardsock轮询监听keyboard连接，  //////////socket_list.Mainsock轮询监听多个client连接.
+server：Keyboard_sock轮询监听keyboard连接，  //////////socket_list.Mainsock轮询监听多个client连接.
 
 
 
