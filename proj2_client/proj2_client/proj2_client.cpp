@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
 	unsigned long arg = 1;
 	int ifsend = 0;
 	char sendbuf[128];
+	timeval timeout;
 
 	WSAStartup(0x101, &wsa);
 	sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -104,18 +105,23 @@ int main(int argc, char* argv[])
 
 	buf = (char*)malloc(2048);
 	//scan the keboard until input string is "exit"
-	
+	timeout.tv_sec = 1;
+	timeout.tv_usec = 0;
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
 	FD_ZERO(&exceptfds);
-
-	ioctlsocket(s, FIONBIO, &arg);
-
+	val= ioctlsocket(s, FIONBIO, &arg);
+	if (val == SOCKET_ERROR) {
+		printf("ioctlsoket unblock error");
+		return 0;
+	}
+	s_keyboard = 0;
 	while (1) {
 		FD_SET(sock, &readfds);
 		FD_SET(s, &readfds);
+		if (s_keyboard > 0) FD_SET(s_keyboard, &readfds);//即将新申请的套接字，可能不在连接态
 
-		val = select(0, &readfds, &writefds, &exceptfds, NULL);//有问题
+		val = select(0, &readfds, &writefds, &exceptfds, &timeout);//有问题，第五个参数改了好像有用
 		if (val == SOCKET_ERROR) {
 			val = WSAGetLastError();
 			break;
@@ -129,6 +135,7 @@ int main(int argc, char* argv[])
 				continue;
 			printf("accept a keyboard connection\n");
 		}
+
 		//键盘输入
 		if (FD_ISSET(s_keyboard, &readfds)) {
 			val = recv(s_keyboard, sendbuf, 128, 0);
@@ -138,18 +145,18 @@ int main(int argc, char* argv[])
 				continue;
 			}
 			else if (val == -1) {
+				closesocket(s_keyboard);
 				val = WSAGetLastError();
 				if (val == WSAEWOULDBLOCK)
 					continue;
-				closesocket(s_keyboard);
 				printf("keyboard disconnected\n");
 				continue;
 			}
 			sendbuf[val] == 0;
-			printf("form keyboard: %s\n", sendbuf);
+			printf("you: %s\n", sendbuf);
 			send(sock, sendbuf, strlen(sendbuf), 0);//从键盘得到立即发送
 		}
-
+		
 		if (FD_ISSET(sock, &readfds)) {
 				val = recv(sock, buf, 100, 0);
 				if (val == 0) {

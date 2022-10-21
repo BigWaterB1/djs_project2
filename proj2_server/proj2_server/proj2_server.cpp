@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 	FD_ZERO(&exceptfds);
 	sock_list.MainSock = s;
 	arg = 1;
+	sock = 0;
 	ioctlsocket(sock_list.MainSock, FIONBIO, &arg);
 
 	ioctlsocket(sock_keyboard, FIONBIO, &arg);
@@ -152,11 +153,20 @@ int main(int argc, char* argv[])
 					continue;
 				}
 				sendbuf[retval] == 0;
-				printf("form keyboard: %s\n", sendbuf);
-				ifsend = 1;//标志，从键盘接收到的消息保证只发一次
-
-				send(sock, sendbuf, strlen(sendbuf), 0);
-				ifsend = 0;
+				//ifsend = 1;//标志，从键盘接收到的消息保证只发一次
+				if (sock > 0) {
+					if (send(sock, sendbuf, strlen(sendbuf), 0) > 0) {
+						printf("you: %s\n", sendbuf);
+					}//收到即发，单用户可以这样做
+					else {
+						printf("failed to send");
+					}
+				}
+				else {
+					printf("no avaliable socket conneted");
+					continue;
+				}
+				//ifsend = 0;
 			}
 			if (sock_list.sock_array[i] == 0)
 				continue;
@@ -181,13 +191,13 @@ int main(int argc, char* argv[])
 				}
 				buf[retval] = 0;//因为不能保证发送方的send函数都+1了
 				printf("->%s\n", buf);
-				send(sock, "ACK by server", 14, 0);
+				//send(sock, "ACK by server", 14, 0);
 			}
 			if(FD_ISSET(sock,&writefds)){
-				
-					printf("I send: %s", sendbuf);
+			//对于多个client的话，最好在这个地方发送，而不是收到即发，可能会发错人
+					/*printf("you: %s", sendbuf);
 					send(sock, sendbuf, strlen(sendbuf), 0);
-					ifsend = 0;
+					ifsend = 0;*/
 			
 			}
 			//if(FD_ISSET(sock,&exceptfds)){

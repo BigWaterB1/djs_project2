@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 	//scan the keboard until input string is "exit"
 	while (1) {
 		printf("Send = ");
-		scanf_s("%s", buf, 2048);
+		scanf_s("%[^\n]%*c", buf, 2048);
 		if (strcmp(buf, "exit") == 0)
 			break;
 		send(sock, buf, strlen(buf)+1, 0);
